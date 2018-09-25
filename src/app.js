@@ -1,15 +1,14 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { addUser, modifyUser, deleteUser } from './reducers/actions';
 import './App.css';
 import ContentWrapper from './components/contentWrapper';
-import GridRow from './components/gridRow';
 import InputElements from './components/inputElements';
 import Modal from './components/modalBox';
+import ResultFilter from './containers/resultFilter';
+import UserSearch from './containers/userSearch';
 import Header from './header';
 import cs from './localize.json';
-import UserSearch from './containers/userSearch';
-import ResultFilter from './containers/resultFilter'
+import { addUser, deleteUser, modifyUser } from './reducers/actions';
 
 
 class App extends Component {
@@ -68,7 +67,7 @@ class App extends Component {
 
 	edit(userId) {
 		this.setState({
-			activeEditedUser: { ...this.props.users.find((user) => (userId == user.id) ? user : null) },
+			activeEditedUser: { ...this.props.users.find((user) => (userId === user.id) ? user : null) },
 			modalOpen: true,
 			editMode: 1
 		})

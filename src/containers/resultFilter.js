@@ -1,6 +1,5 @@
 import { connect } from 'react-redux';
-import GridRow from '../components/gridRow';
-import UserGrid from './userGrid'
+import UserGrid from './userGrid';
 
 const getResultOfUser = (users, searchFilter) => {
   switch (searchFilter.active) {

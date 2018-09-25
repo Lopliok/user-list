@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import InputElements from './components/inputElements';
 
 const header = {
 	button: {

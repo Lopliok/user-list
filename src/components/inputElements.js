@@ -1,7 +1,7 @@
 import React from 'react';
 
 const InputElements = (props) => {
-	if (props.type == 'dropdown') {
+	if (props.type === 'dropdown') {
 		return (
 			<div className="input-group input-group-sm mb-3">
 			<div className="input-group-prepend">

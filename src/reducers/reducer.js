@@ -30,7 +30,7 @@ function users(state = [], action) {
 				return user
 			})
 		case DELETE_USER:
-			return state.filter((u) => u.id != action.id)
+			return state.filter((u) => u.id !== action.id)
 		default:
 			return state
 	}
