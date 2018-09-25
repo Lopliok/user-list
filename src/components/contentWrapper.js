@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 const wrapperStyle = {
 	width: "80%",
@@ -11,7 +11,6 @@ const ContentWrapper = (props) => {
         {props.children}
       </div>
     );
-  }
-
+}
 
 export default ContentWrapper;

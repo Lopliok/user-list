@@ -1,0 +1,17 @@
+{
+	"user": {
+		"name": "",
+		"nickname": "",
+		"sex": "man"
+	},
+	"text": {
+		"user": [
+			"New user",
+			"Edit user"
+		],
+		"sexOptions": [
+			"man",
+			"woman"
+		]
+	}
+}

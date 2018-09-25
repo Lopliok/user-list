@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { addUser, modifyUser, deleteUser } from './reducers/actions';
 import './App.css';
-import ContentWrapper from './components/contentWrapper'
+import ContentWrapper from './components/contentWrapper';
 import GridRow from './components/gridRow';
-import Modal from './components/modalBox'
 import InputElements from './components/inputElements';
+import Modal from './components/modalBox';
 import Header from './header';
-import SearchValueContext from './header'
-import PropTypes from 'prop-types'
+import cs from './localize.json';
+import UserSearch from './containers/userSearch';
+import ResultFilter from './containers/resultFilter'
+
 
 class App extends Component {
 
@@ -14,43 +18,36 @@ class App extends Component {
 		super(props)
 
 		this.state = {
-			users: [
-				{ id: 1, name: "Jarda", nickname: "Pepík", sex: "man" },
-				{ id: 2, name: "Jarda", nickname: "Pepíkddddddd", sex: "man" },
-				{ id: 3, name: "Jarda", nickname: "Pepík", sex: "man" }
-			],
 			modalOpen: false,
-			activeEditedUser: {
-				name: "",
-				nickname: "",
-				sex: "man"
-			},
-			nextUserId: 4,
-			editModes: ['New user', 'Edit User'],
+			activeEditedUser: cs.user,
 			editMode: 0
 		}
-		this.openModal = this.openModal.bind(this)
+		this.create = this.create.bind(this)
 		this.closeModal = this.closeModal.bind(this)
 		this.handleChange = this.handleChange.bind(this)
+		this.handleSave = this.handleSave.bind(this)
 		this.save = this.save.bind(this)
+		this.edit = this.edit.bind(this)
+		this.delete = this.delete.bind(this)
+		this.modifyUser = this.modifyUser.bind(this)
 	}
 
-	openModal() {
+	create() {
 		this.setState({
 			modalOpen: true,
 			editMode: 0
 		})
 	}
 
-	handleChange (e) {
-		const attrName = e.target.name
-		const attrValue = e.target.value
+	handleChange(e) {
+		const targetName = e.target.name
+		const targetValue = e.target.value
 
 		this.setState((prevState) => {
 			return ({
 				activeEditedUser: {
 					...prevState.activeEditedUser,
-					[attrName]: attrValue
+					[targetName]: targetValue
 				}
 			})
 		})
@@ -60,93 +57,70 @@ class App extends Component {
 		this.setState({ modalOpen: false })
 	}
 
+	handleSave() {
+		const save = this.state.editMode ? this.modifyUser : this.save
+		save()
+		this.setState({
+			activeEditedUser: cs.user,
+			modalOpen: false
+		})
+	}
+
 	edit(userId) {
-		this.setState((prevState) => {
-			const editedUser = {...prevState.users[prevState.users.findIndex((u) => u.id == userId)]}
-
-			return ({
-				activeEditedUser: editedUser,
-				editMode: 1,
-				modalOpen: true
-			})
+		this.setState({
+			activeEditedUser: { ...this.props.users.find((user) => (userId == user.id) ? user : null) },
+			modalOpen: true,
+			editMode: 1
 		})
 	}
 
-	handleConfirm() {
-		switch (this.state.editMode) {
-			case 1:
-			let prevUsers = [...this.state.users]
-			prevUsers[prevUsers.findIndex((u) => u.id == this.state.activeEditedUser.id)] = {...this.state.activeEditedUser}
-			this.save(prevUsers, false)
-				break;	
-			case 2:
-			let newUsers = [...this.state.users]
-			newUsers.push({ id: this.state.nextUserId, ...this.state.activeEditedUser })
-			const userId = this.state.nextUserId + 1
-			this.save(newUsers, true)
-				break;
-		}
-
-
+	async save() {
+		await this.props.addUser({ ...this.state.activeEditedUser });
 	}
 
-
-	save(users, isNew) {
-
-		this.setState((prevState) => {
-			let nextId = isNew ? prevState.nextUserId + 1 : prevState.nextUserId
-			return ({
-				users: users,
-				activeEditedUser: {},
-				nextUserId: prevState.nextUserId+1	
-			})
-		})
-		console.log(this.state)
-		this.closeModal()
+	async modifyUser() {
+		await this.props.modifyUser({ ...this.state.activeEditedUser });
 	}
 
-	
-
-	handleDelete(userId) {
-		this.setState((prevState) => {
-			let prevUsers = [...prevState.users]
-			prevUsers.splice(prevUsers.findIndex((u) => u.id == userId), 1)
-
-			return ({
-				users: prevUsers
-			})
-
-		})
+	delete(userId) {
+		this.props.deleteUser(userId)
 	}
 
 	render() {
 		return (
 			<div className="App">
-				<Header createNew={this.openModal} />
+				<Header createNew={this.create} >
+					<UserSearch />
+				</Header>
 
-				<Modal visible={this.state.modalOpen} onClose={this.closeModal} title={this.state.editModes[this.state.editMode]}>
+				<Modal visible={this.state.modalOpen} onClose={this.closeModal} title={cs.text.user[this.state.editMode]}>
 
 					<InputElements inputName="name" type='text' value={this.state.activeEditedUser.name} label='User Name' onChange={this.handleChange} />
 					<InputElements inputName="nickname" type='text' value={this.state.activeEditedUser.nickname} label='Nickname' onChange={this.handleChange} />
-					<InputElements inputName="sex" type='dropdown' selectedValue={1} options={['man', 'woman']} label='Sex' onChange={this.handleChange} />
+					<InputElements inputName="sex" type='dropdown' selectedValue={this.state.activeEditedUser.sex} options={cs.text.sexOptions} label='Sex' onChange={this.handleChange} />
 
-					<button className='btn btn-primary btn-sm' onClick={this.save}>Save</button>
+					<button className='btn btn-primary btn-sm' onClick={this.handleSave}>Save</button>
 
 				</Modal>
 				<ContentWrapper>
-					{this.state.users.map((user, idx) =>
-						<GridRow column={user} key={idx}
-							left={
-								<button className='btn btn-info btn-sm' onClick={() => this.edit(user.id)} >Edit</button>
-							}
-							right={
-								<button className='btn btn-danger btn-sm' onClick={() => this.handleDelete(user.id)}>Delete</button>
-							} />
-					)}
+					<ResultFilter edit={this.edit} deleteUser={this.delete} />
 				</ContentWrapper>
 			</div>
 		);
 	}
 }
 
-export default App;
+const mapStateToProps = state => ({
+	users: state.users
+})
+
+const mapDispatchToProps = dispatch => ({
+	addUser: user => dispatch(addUser(user)),
+	modifyUser: user => dispatch(modifyUser(user)),
+	deleteUser: user => dispatch(deleteUser(user)),
+})
+
+export default connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(App)

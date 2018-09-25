@@ -8,8 +8,6 @@ const header = {
 	}
 }
 
-const SearchValueContext = React.createContext('');
-
 class Header extends Component {
 
 	constructor(props) {
@@ -25,15 +23,12 @@ class Header extends Component {
 			[e.target.name]: e.target.value
 		})
 
-
 	render() {
 		return (
 			<header className='App-header'>
 				<button className='btn btn-outline-info' onClick={this.props.createNew} style={header.button}>Add user</button>
 				<div style={{ width: '350px', float: 'right' }}>
-					<SearchValueContext.Provider value="dark">
-						<InputElements name='search' type='text' label='search' onChange={this.handleChange} />
-					</SearchValueContext.Provider>
+					{this.props.children}
 				</div>
 
 			</header>
